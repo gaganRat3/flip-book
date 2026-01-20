@@ -48,14 +48,17 @@ class FlipBook(models.Model):
 
     def save(self, *args, **kwargs):
         """Override save to convert PDF to images and handle thumbnail logic"""
+        is_new = self._state.adding
         super().save(*args, **kwargs)
 
         # Convert PDF to images if not already done
         if self.pdf_file and self.total_pages == 0:
             self.convert_pdf_to_images()
 
-        # Only generate a thumbnail from the first page if no thumbnail is uploaded
-        if self.pdf_file and not self.thumbnail:
+        # Only generate a thumbnail from the first page if no thumbnail is present after save
+        # (prevents overwriting uploaded thumbnails)
+        refreshed = type(self).objects.get(pk=self.pk)
+        if self.pdf_file and not refreshed.thumbnail:
             self.generate_thumbnail_from_first_page()
 
     def generate_thumbnail_from_first_page(self):
