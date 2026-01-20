@@ -11,10 +11,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'keyla-mirier-pebbly.ngrok-free.dev']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '1fa6354c2018.ngrok-free.app']
 
 # CSRF trusted origins for ngrok
-CSRF_TRUSTED_ORIGINS = ['https://keyla-mirier-pebbly.ngrok-free.dev']
+CSRF_TRUSTED_ORIGINS = ['https://1fa6354c2018.ngrok-free.app']
+
+# CSRF cookie settings for production
+CSRF_COOKIE_SECURE = False  # Set to True if using HTTPS in production
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 # Application definition
 INSTALLED_APPS = [
@@ -50,6 +54,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',
             ],
         },
     },
@@ -92,6 +97,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Login/Logout URLs
-LOGIN_URL = 'login'
+LOGIN_URL = 'register'
 LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'login'
+LOGOUT_REDIRECT_URL = 'register'

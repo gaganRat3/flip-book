@@ -6,42 +6,60 @@
 <style>
     body { overflow: hidden; }
     .flipbook-viewer { position: fixed; top: 80px; left: 0; right: 0; bottom: 0; background: #2d3748; display: flex; flex-direction: column; }
-    .viewer-header { background: rgba(255, 255, 255, 0.95); padding: 34px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; }
+    .viewer-header { background: rgba(255, 255, 255, 0.95); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; }
     .viewer-title { font-size: 18px; font-weight: 600; color: #333; }
-    .viewer-back { text-decoration: none; color: #667eea; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: color 0.3s; }
-    .viewer-back:hover { color: #764ba2; }
-    .viewer-content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; overflow: hidden; position: relative; width: 100%; }
-    .flipbook-container { position: relative; display: flex; align-items: center; justify-content: center; }
+    .viewer-back { text-decoration: none; color: #2c53fd; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: color 0.3s; }
+    .viewer-back:hover { color: #0cb3e6; }
+    .viewer-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px; overflow-y: auto; overflow-x: hidden; position: relative; width: 100%; background: #FAF3E1; }
+    .flipbook-container { position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; flex-shrink: 0; overflow: visible; }
     #flipbook { margin: 0 auto; }
     #flipbook .page { background: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(0, 0, 0, 0.2); }
     #flipbook .page img { width: 100%; height: 100%; object-fit: contain; }
-    .controls { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); padding: 15px 25px; border-radius: 50px; display: flex; gap: 15px; align-items: center; box-shadow: 0 5px 30px rgba(0, 0, 0, 0.5); z-index: 9999; }
+    /* Side Navigation Buttons */
+    .side-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: linear-gradient(135deg, #125bfa 0%, #4083ff 100%); border: none; color: white; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 5px 20px rgba(18, 91, 250, 0.3); z-index: 100; }
+    .side-nav-btn:hover:not(:disabled) { background: linear-gradient(135deg, #0d47a1 0%, #2565e8 100%); transform: translateY(-50%) scale(1.1); }
+    .side-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    #prev-side-btn { left: -70px; }
+    #next-side-btn { right: -70px; }
+    .controls { position: relative; bottom: auto; left: auto; transform: none; background: linear-gradient(135deg, #125bfa 0%, #4083ff 100%); backdrop-filter: blur(10px); padding: 15px 25px; border-radius: 50px; display: flex; gap: 15px; align-items: center; box-shadow: 0 5px 30px rgba(250, 129, 18, 0.3); z-index: 9999; margin-bottom: 30px; flex-shrink: 0; }
     .control-btn { background: rgba(255, 255, 255, 0.1); border: none; color: white; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; font-size: 18px; }
     .control-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.2); transform: scale(1.1); }
     .control-btn:disabled { opacity: 0.3; cursor: not-allowed; }
     .page-counter { color: white; font-weight: 600; font-size: 14px; min-width: 80px; text-align: center; padding: 0 15px; }
+    .jump-to-page { display: flex; gap: 6px; margin-left: 15px; padding-left: 15px; border-left: 1px solid rgba(255, 255, 255, 0.2); align-items: center; }
+    #jump-page-input { background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); color: white; width: 60px; padding: 8px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; text-align: center; transition: all 0.3s ease; }
+    #jump-page-input:focus { outline: none; background: rgba(255, 255, 255, 0.25); border-color: rgba(255, 255, 255, 0.6); }
+    #jump-page-input::placeholder { color: rgba(255, 255, 255, 0.5); }
     .zoom-controls { display: flex; gap: 10px; margin-left: 15px; padding-left: 15px; border-left: 1px solid rgba(255, 255, 255, 0.2); }
     .fullscreen-btn { margin-left: 15px; padding-left: 15px; border-left: 1px solid rgba(255, 255, 255, 0.2); }
     .loading-spinner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 48px; animation: spin 1s linear infinite; }
     @keyframes spin { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
     @media (max-width: 768px) {
         .flipbook-viewer { top: 70px; }
-        .viewer-header { padding: 35px 15px; }
+        .viewer-header { padding: 10px 15px; }
         .viewer-title { font-size: 16px; }
-        .viewer-content { padding: 10px; }
-        .flipbook-container { max-width: 95%; max-height: 80%; }
-        .controls { bottom: 15px; padding: 10px 15px; gap: 8px; flex-wrap: nowrap; justify-content: center; border-radius: 30px; width: auto; max-width: 95%; }
-        .control-btn { width: 36px; height: 36px; font-size: 14px; flex-shrink: 0; }
-        .page-counter { font-size: 11px; min-width: 50px; padding: 0 5px; flex-shrink: 0; }
-        .zoom-controls { margin-left: 5px; padding-left: 8px; border-left: 1px solid rgba(255, 255, 255, 0.2); gap: 6px; }
-        .fullscreen-btn { margin-left: 5px; padding-left: 8px; border-left: 1px solid rgba(255, 255, 255, 0.2); }
+        .viewer-content { padding: 10px; flex-direction: column; }
+        .flipbook-container { max-width: 100%; max-height: 70vh; padding: 0 50px; }
+        #prev-side-btn { display: flex !important; width: 40px; height: 40px; font-size: 16px; position: absolute; left: 0px; top: 50%; transform: translateY(-50%); z-index: 1000; }
+        #next-side-btn { display: flex !important; width: 40px; height: 40px; font-size: 16px; position: absolute; right: 0px; top: 50%; transform: translateY(-50%); z-index: 1000; }
+        .controls { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); padding: 10px 12px; gap: 5px; flex-wrap: wrap; justify-content: center; border-radius: 25px; width: 95%; max-width: 100%; margin: 0; overflow: visible; display: flex; }
+        .control-btn { width: 38px; height: 38px; font-size: 13px; flex-shrink: 0; min-width: 38px; }
+        .page-counter { font-size: 12px; min-width: 65px; padding: 0 10px; flex-shrink: 0; white-space: nowrap; }
+        .jump-to-page { display: none; }
+        .zoom-controls { margin-left: 5px; padding-left: 5px; border-left: 1px solid rgba(255, 255, 255, 0.2); gap: 5px; }
+        .fullscreen-btn { margin-left: 5px; padding-left: 5px; border-left: 1px solid rgba(255, 255, 255, 0.2); }
     }
     @media (max-width: 480px) {
-        .controls { padding: 8px 10px; gap: 5px; }
-        .control-btn { width: 32px; height: 32px; font-size: 12px; }
-        .page-counter { font-size: 10px; min-width: 45px; padding: 0 3px; }
-        .zoom-controls { margin-left: 3px; padding-left: 5px; gap: 4px; }
-        .fullscreen-btn { margin-left: 3px; padding-left: 5px; }
+        .flipbook-viewer { top: 60px; }
+        .flipbook-container { padding: 0 45px; }
+        #prev-side-btn { width: 38px; height: 38px; font-size: 14px; }
+        #next-side-btn { width: 38px; height: 38px; font-size: 14px; }
+        .controls { bottom: 8px; padding: 8px 10px; gap: 4px; width: 98%; }
+        .control-btn { width: 36px; height: 36px; font-size: 12px; min-width: 36px; }
+        .page-counter { font-size: 11px; min-width: 55px; padding: 0 5px; }
+        .zoom-controls { margin-left: 3px; padding-left: 3px; gap: 3px; }
+        .zoom-controls .control-btn { display: inline-flex; }
+        .fullscreen-btn { margin-left: 3px; padding-left: 3px; }
     }
 </style>
 {% endblock %}
@@ -55,25 +73,31 @@
     <div class="viewer-content" id="viewer-content">
         <div class="loading-spinner"><i class="fas fa-spinner"></i></div>
         <div class="flipbook-container" id="flipbook-wrapper" style="display: none;">
+            <button class="side-nav-btn" id="prev-side-btn" title="Previous Page"><i class="fas fa-chevron-left"></i></button>
             <div id="flipbook">
                 {% for page in pages %}
-                <div class="page"><img src="{{ page }}" alt="Page {{ forloop.counter }}" loading="lazy"></div>
+                <div class="page" data-page="{{ forloop.counter }}"></div>
                 {% endfor %}
             </div>
+            <button class="side-nav-btn" id="next-side-btn" title="Next Page"><i class="fas fa-chevron-right"></i></button>
         </div>
         <div class="controls">
             <button class="control-btn" id="prev-btn" title="Previous Page"><i class="fas fa-chevron-left"></i></button>
-            <button class="control-btn" id="first-btn" title="First Page"><i class="fas fa-step-backward"></i></button>
+            {% comment %} <button class="control-btn" id="first-btn" title="First Page"><i class="fas fa-step-backward"></i></button> {% endcomment %}
             <div class="page-counter"><span id="current-page">1</span> / <span id="total-pages">{{ total_pages }}</span></div>
-            <button class="control-btn" id="last-btn" title="Last Page"><i class="fas fa-step-forward"></i></button>
+            {% comment %} <button class="control-btn" id="last-btn" title="Last Page"><i class="fas fa-step-forward"></i></button> {% endcomment %}
             <button class="control-btn" id="next-btn" title="Next Page"><i class="fas fa-chevron-right"></i></button>
+            <div class="jump-to-page">
+                <input type="number" id="jump-page-input" placeholder="Go to page" title="Jump to Page" min="1" max="{{ total_pages }}">
+                <button class="control-btn" id="jump-page-btn" title="Jump to Page"><i class="fas fa-arrow-right"></i></button>
+            </div>
             <div class="zoom-controls">
                 <button class="control-btn" id="zoom-out" title="Zoom Out"><i class="fas fa-search-minus"></i></button>
                 <button class="control-btn" id="zoom-in" title="Zoom In"><i class="fas fa-search-plus"></i></button>
             </div>
-            <div class="fullscreen-btn">
+            {% comment %} <div class="fullscreen-btn">
                 <button class="control-btn" id="fullscreen" title="Fullscreen"><i class="fas fa-expand"></i></button>
-            </div>
+            </div> {% endcomment %}
         </div>
     </div>
 </div>
@@ -84,7 +108,51 @@
 <script>
 $(document).ready(function() {
     let currentZoom = 1;
-    const totalPages = {{ total_pages }};
+    const totalPages = parseInt("{{ total_pages }}") || 0;
+    let pages = [];
+    try {
+        pages = JSON.parse('{{ pages|safe|escapejs }}');
+    } catch(e) {
+        console.error('Error parsing pages:', e);
+        pages = [];
+    }
+    const loadedPages = new Set();
+    
+    // Preload page images
+    function loadPage(pageNum) {
+        if (loadedPages.has(pageNum) || pageNum < 1 || pageNum > totalPages) return;
+        
+        const pageDiv = $(`#flipbook .page[data-page="${pageNum}"]`);
+        if (pageDiv.length && !pageDiv.find('img').length) {
+            const img = $('<img>', {
+                src: pages[pageNum - 1],
+                alt: 'Page ' + pageNum,
+                css: { width: '100%', height: '100%', 'object-fit': 'contain' }
+            });
+            pageDiv.append(img);
+            loadedPages.add(pageNum);
+        }
+    }
+    
+    // Load current page and surrounding pages
+    function loadSurroundingPages(currentPage) {
+        const isMobile = window.innerWidth <= 768;
+        const range = isMobile ? 2 : 3; // Load 2-3 pages ahead/behind
+        
+        loadPage(currentPage);
+        if (!isMobile) loadPage(currentPage + 1); // Load facing page in double mode
+        
+        // Preload next and previous pages
+        for (let i = 1; i <= range; i++) {
+            loadPage(currentPage + i);
+            loadPage(currentPage - i);
+            if (!isMobile) {
+                loadPage(currentPage + i + 1);
+                loadPage(currentPage - i + 1);
+            }
+        }
+    }
+    
     function initFlipbook() {
         const isMobile = window.innerWidth <= 768;
         $("#flipbook").turn({
@@ -92,21 +160,54 @@ $(document).ready(function() {
             height: isMobile ? window.innerHeight * 0.6 : 600,
             autoCenter: true, acceleration: true, gradients: true, elevation: 50, duration: 1000, pages: totalPages,
             display: isMobile ? 'single' : 'double',
-            when: { turned: function(event, page, view) { updatePageCounter(page); } }
+            when: { 
+                turning: function(event, page, view) {
+                    loadSurroundingPages(page);
+                },
+                turned: function(event, page, view) { 
+                    updatePageCounter(page);
+                    loadSurroundingPages(page);
+                } 
+            }
         });
+        
+        // Load first few pages immediately
+        loadSurroundingPages(1);
+        
         $('.loading-spinner').fadeOut();
         $('#flipbook-wrapper').fadeIn();
         updatePageCounter(1);
     }
     function updatePageCounter(page) {
         $('#current-page').text(page);
-        $('#prev-btn, #first-btn').prop('disabled', page <= 1);
-        $('#next-btn, #last-btn').prop('disabled', page >= totalPages);
+        $('#prev-btn, #first-btn, #prev-side-btn').prop('disabled', page <= 1);
+        $('#next-btn, #last-btn, #next-side-btn').prop('disabled', page >= totalPages);
     }
     $('#prev-btn').click(function() { $("#flipbook").turn("previous"); });
     $('#next-btn').click(function() { $("#flipbook").turn("next"); });
+    $('#prev-side-btn').click(function() { $("#flipbook").turn("previous"); });
+    $('#next-side-btn').click(function() { $("#flipbook").turn("next"); });
     $('#first-btn').click(function() { $("#flipbook").turn("page", 1); });
     $('#last-btn').click(function() { $("#flipbook").turn("page", totalPages); });
+    
+    // Jump to page functionality
+    $('#jump-page-btn').click(function() {
+        const pageNum = parseInt($('#jump-page-input').val());
+        if (pageNum >= 1 && pageNum <= totalPages) {
+            $("#flipbook").turn("page", pageNum);
+            $('#jump-page-input').val('');
+        } else {
+            alert('Please enter a page number between 1 and ' + totalPages);
+        }
+    });
+    
+    // Allow Enter key in input field
+    $('#jump-page-input').keypress(function(e) {
+        if (e.which == 13) { // Enter key
+            $('#jump-page-btn').click();
+        }
+    });
+    
     $('#zoom-in').click(function() { if (currentZoom < 2) { currentZoom += 0.2; applyZoom(); } });
     $('#zoom-out').click(function() { if (currentZoom > 0.6) { currentZoom -= 0.2; applyZoom(); } });
     function applyZoom() { $('#flipbook-wrapper').css('transform', 'scale(' + currentZoom + ')'); }
@@ -125,15 +226,15 @@ $(document).ready(function() {
     });
     $(window).resize(function() {
         const isMobile = window.innerWidth <= 768;
-        const currentPage = $("#flipbook").turn("page");
-        $("#flipbook").turn("destroy");
-        $("#flipbook").turn({
-            width: isMobile ? window.innerWidth * 0.9 : 800,
-            height: isMobile ? window.innerHeight * 0.6 : 600,
-            autoCenter: true, acceleration: true, gradients: true, elevation: 50, duration: 1000, pages: totalPages,
-            display: isMobile ? 'single' : 'double', page: currentPage,
-            when: { turned: function(event, page, view) { updatePageCounter(page); } }
-        });
+        try {
+            const currentPage = $("#flipbook").turn("page");
+            $("#flipbook").turn("size", 
+                isMobile ? window.innerWidth * 0.9 : 800,
+                isMobile ? window.innerHeight * 0.6 : 600
+            );
+        } catch(e) {
+            console.log("Resize handling:", e);
+        }
     });
     setTimeout(initFlipbook, 500);
 });

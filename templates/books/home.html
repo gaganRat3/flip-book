@@ -6,56 +6,183 @@
 <div class="library-container">
     <div class="container">
         <div class="library-header">
-            <h1><i class="fas fa-book"></i> FlipBook Library</h1>
+            <h1><i class="fas fa-book-open"></i> FlipBook Library</h1>
             <p>Explore our collection of interactive flipbooks</p>
         </div>
-        {% if books %}
-        <div class="books-grid">
-            {% for book in books %}
-            <div class="book-card">
-                <a href="{% url 'flipbook' book.id %}" class="book-link">
-                    <div class="book-thumbnail">
-                        {% if book.thumbnail %}
-                        <img src="{{ book.thumbnail.url }}" alt="{{ book.title }}">
-                        {% else %}
-                        <div class="book-placeholder"><i class="fas fa-book-open"></i></div>
-                        {% endif %}
-                        <div class="book-overlay"><i class="fas fa-eye"></i><span>View Book</span></div>
-                    </div>
-                    <div class="book-info">
-                        <h3>{{ book.title }}</h3>
-                        {% if book.description %}<p>{{ book.description|truncatewords:15 }}</p>{% endif %}
-                        <div class="book-meta">
-                            <span><i class="fas fa-file-pdf"></i> {{ book.total_pages }} pages</span>
-                            <span><i class="fas fa-calendar"></i> {{ book.created_at|date:"M d, Y" }}</span>
-                        </div>
-                    </div>
+        
+        <!-- Event Filter Section -->
+        {% if events %}
+        <div class="event-filter-section">
+            <h3><i class="fas fa-filter"></i> Filter by Event</h3>
+            <div class="event-filter-container">
+                <a href="{% url 'home' %}" class="event-filter-btn {% if not selected_event %}active{% endif %}">
+                    <i class="fas fa-list"></i> All Books
                 </a>
+                {% for event in events %}
+                <a href="{% url 'home' %}?event={{ event.id }}" class="event-filter-btn {% if selected_event == event.id %}active{% endif %}" style="--event-color: {{ event.color }};">
+                    <i class="{{ event.icon }}"></i> {{ event.name }}
+                </a>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
+        {% endif %}
+        
+        {% if books %}
+        <!-- Event-wise Booklet Display -->
+        {% if selected_event %}
+            <!-- Single Event View -->
+            <div class="books-grid">
+                {% for book in books %}
+                <div class="book-card">
+                    <a href="{% url 'flipbook' book.id %}" class="book-link">
+                        <div class="book-thumbnail">
+                            {% if book.thumbnail %}
+                            <img src="{{ book.thumbnail.url }}" alt="{{ book.title }}">
+                            {% else %}
+                            <div class="book-placeholder"><i class="fas fa-book-open"></i></div>
+                            {% endif %}
+                            <div class="book-overlay"><i class="fas fa-eye"></i><span>View Book</span></div>
+                        </div>
+                        <div class="book-info">
+                            <h3>{{ book.title }}</h3>
+                            {% if book.description %}<p>{{ book.description|truncatewords:15 }}</p>{% endif %}
+                            <div class="book-meta">
+                                <span><i class="fas fa-file-pdf"></i> {{ book.total_pages }} pages</span>
+                                <span><i class="fas fa-calendar"></i> {{ book.created_at|date:"M d, Y" }}</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- All Events View -->
+            {% regroup books by event as books_by_event %}
+            {% for grouper in books_by_event %}
+                <div class="event-section" {% if grouper.grouper %}style="--event-color: {{ grouper.grouper.color }};"{% endif %}>
+                    <div class="event-header">
+                        {% if grouper.grouper %}
+                            <div class="event-title-wrapper">
+                                <i class="{{ grouper.grouper.icon }}"></i>
+                                <h2>{{ grouper.grouper.name }}</h2>
+                            </div>
+                            {% if grouper.grouper.description %}
+                            <p class="event-description">{{ grouper.grouper.description }}</p>
+                            {% endif %}
+                        {% else %}
+                            <div class="event-title-wrapper">
+                                <i class="fas fa-inbox"></i>
+                                <h2>Uncategorized Books</h2>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="books-grid">
+                        {% for book in grouper.list %}
+                        <div class="book-card">
+                            <a href="{% url 'flipbook' book.id %}" class="book-link">
+                                <div class="book-thumbnail">
+                                    {% if book.thumbnail %}
+                                    <img src="{{ book.thumbnail.url }}" alt="{{ book.title }}">
+                                    {% else %}
+                                    <div class="book-placeholder"><i class="fas fa-book-open"></i></div>
+                                    {% endif %}
+                                    <div class="book-overlay"><i class="fas fa-eye"></i><span>View Book</span></div>
+                                </div>
+                                <div class="book-info">
+                                    <h3>{{ book.title }}</h3>
+                                    {% if book.description %}<p>{{ book.description|truncatewords:15 }}</p>{% endif %}
+                                    <div class="book-meta">
+                                        <span><i class="fas fa-file-pdf"></i> {{ book.total_pages }} pages</span>
+                                        <span><i class="fas fa-calendar"></i> {{ book.created_at|date:"M d, Y" }}</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
         {% else %}
         <div class="empty-state">
-            <i class="fas fa-book-open"></i>
-            <h2>No FlipBooks Yet</h2>
-            <p>Contact an administrator to upload flipbooks.</p>
+            <i class="fas fa-inbox"></i>
+            <h2>{% if selected_event %}No Books in This Event{% else %}No FlipBooks Available{% endif %}</h2>
+            <p>
+                {% if selected_event %}
+                    <a href="{% url 'home' %}" class="reset-filter-link">View All Events</a>
+                {% else %}
+                    You do not have access to any flipbook yet.<br>
+                    Please contact an administrator to grant you access. Come back after access is given.
+                {% endif %}
+            </p>
         </div>
         {% endif %}
     </div>
 </div>
+
 <style>
-    .library-container { padding: 40px 0; min-height: calc(100vh - 80px); }
-    .library-header { text-align: center; margin-bottom: 50px; color: white; }
-    .library-header h1 { font-size: 48px; font-weight: 700; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+    .library-container { padding: 40px 0; min-height: calc(100vh - 80px); background: linear-gradient(135deg, #FAF3E1 0%, #FAF3E1 100%); }
+    .library-header { text-align: center; margin-bottom: 50px; color: #222222; }
+    .library-header h1 { font-size: 48px; font-weight: 700; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.1); color: #FA8112; display: flex; align-items: center; justify-content: center; gap: 15px; }
+    .library-header h1 i { font-size: 50px; }
     .library-header p { font-size: 18px; opacity: 0.9; }
-    .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
-    .book-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.15); transition: all 0.4s ease; }
+    
+    /* Event Filter Styles */
+    .event-filter-section { margin-bottom: 50px; }
+    .event-filter-section h3 { font-size: 20px; font-weight: 700; color: #222222; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .event-filter-section h3 i { color: #FA8112; }
+    .event-filter-container { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .event-filter-btn { 
+        padding: 12px 24px; 
+        border-radius: 50px; 
+        background: white; 
+        color: #222222; 
+        text-decoration: none; 
+        font-weight: 600; 
+        font-size: 14px; 
+        display: flex; 
+        align-items: center; 
+        gap: 8px; 
+        transition: all 0.3s ease; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        border: 2px solid transparent;
+        cursor: pointer;
+    }
+    .event-filter-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+    .event-filter-btn.active { 
+        background: var(--event-color, #FA8112); 
+        color: white; 
+        box-shadow: 0 8px 25px rgba(250, 129, 18, 0.4);
+    }
+    .event-filter-btn i { font-size: 16px; }
+    
+    /* Event Section Styles */
+    .event-section { margin-bottom: 60px; }
+    .event-header { 
+        margin-bottom: 30px; 
+        padding: 30px; 
+        background: linear-gradient(135deg, var(--event-color, #FA8112) 0%, var(--event-color, #FA8112) 100%); 
+        border-radius: 15px; 
+        color: white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    .event-title-wrapper { display: flex; align-items: center; gap: 15px; margin-bottom: 0px; margin-top: 0px;}
+    .event-title-wrapper i { font-size: 40px; }
+    .event-header h2 { font-size: 32px; font-weight: 700; margin: 0; }
+    .event-description { font-size: 16px; opacity: 0.95; margin: 0; }
+    
+    /* Books Grid */
+    .books-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; }
+    @media (max-width: 900px) {
+        .books-grid { grid-template-columns: repeat(1, 1fr); gap: 20px; }
+    }
+    .book-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.15); transition: all 0.4s ease; }
     .book-card:hover { transform: translateY(-10px); box-shadow: 0 15px 40px rgba(0,0,0,0.25); }
     .book-link { text-decoration: none; color: inherit; }
     .book-thumbnail { position: relative; width: 100%; padding-top: 133%; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); overflow: hidden; }
     .book-thumbnail img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
     .book-placeholder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 60px; color: #d1d5db; }
-    .book-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(102, 126, 234, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; opacity: 0; transition: opacity 0.3s ease; color: white; }
+    .book-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(250, 129, 18, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; opacity: 0; transition: opacity 0.3s ease; color: white; }
     .book-card:hover .book-overlay { opacity: 1; }
     .book-overlay i { font-size: 40px; }
     .book-overlay span { font-size: 18px; font-weight: 600; }
@@ -64,15 +191,25 @@
     .book-info p { color: #666; font-size: 14px; margin-bottom: 15px; line-height: 1.5; }
     .book-meta { display: flex; gap: 15px; flex-wrap: wrap; font-size: 13px; color: #999; }
     .book-meta span { display: flex; align-items: center; gap: 5px; }
-    .book-meta i { color: #667eea; }
-    .empty-state { text-align: center; padding: 100px 20px; color: white; }
-    .empty-state i { font-size: 100px; margin-bottom: 30px; opacity: 0.5; }
-    .empty-state h2 { font-size: 36px; margin-bottom: 15px; }
-    .empty-state p { font-size: 18px; opacity: 0.8; }
+    .book-meta i { color: #FA8112; }
+    
+    /* Empty State */
+    .empty-state { text-align: center; padding: 100px 20px; }
+    .empty-state i { font-size: 100px; margin-bottom: 30px; opacity: 0.3; color: #666; }
+    .empty-state h2 { font-size: 36px; margin-bottom: 15px; color: #666; }
+    .empty-state p { font-size: 18px; opacity: 0.7; color: #666; }
+    .reset-filter-link { color: #FA8112; text-decoration: none; font-weight: 600; transition: color 0.3s; }
+    .reset-filter-link:hover { color: #FF9140; }
+    
     @media (max-width: 768px) {
-        .library-header h1 { font-size: 32px; }
+        .library-header h1 { font-size: 32px; flex-direction: column; }
+        .library-header h1 i { font-size: 36px; }
         .library-header p { font-size: 16px; }
-        .books-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .event-filter-container { justify-content: center; }
+        .event-header { padding: 3px; }
+        .event-title-wrapper i { font-size: 32px; }
+        .event-header h2 { font-size: 24px; }
+        .books-grid { grid-template-columns: repeat(1, 1fr); gap: 20px; }
     }
 </style>
 {% endblock %}

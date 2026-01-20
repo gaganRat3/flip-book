@@ -1,0 +1,62 @@
+{% extends "admin/base_site.html" %}
+{% load user_dict %}
+
+{% block extrahead %}
+<style>
+    .flipbook-scroll-container {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #222;
+        padding: 10px;
+        border-radius: 4px;
+        background-color: #181818;
+    }
+    .flipbook-scroll-container label {
+        display: block;
+        margin: 6px 0;
+        padding: 4px;
+        cursor: pointer;
+        border-radius: 3px;
+        transition: background-color 0.2s;
+    }
+    .flipbook-scroll-container label:hover {
+        background-color: #232323;
+    }
+    .flipbook-scroll-container input[type="checkbox"] {
+        margin-right: 6px;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>User FlipBook Access Management</h1>
+<form method="post">{% csrf_token %}
+<table class="adminlist">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>FlipBooks (checkboxes)</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for user in users %}
+        <tr>
+            <td><strong>{{ user.username }}</strong><br><small>{{ user.email }}</small></td>
+            <td>
+                <div class="flipbook-scroll-container">
+                    {% for flipbook in flipbooks %}
+                        <label>
+                            <input type="checkbox" name="flipbooks_{{ user.id }}" value="{{ flipbook.id }}" {% if flipbook.id in user_flipbook_ids|dict_get:user.id %}checked{% endif %}>
+                            {{ flipbook.title }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<input type="submit" value="Save Changes" class="default">
+</form>
+{% endblock %}

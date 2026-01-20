@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - FlipBook{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="register-card">
+        <div class="register-header">
+            <i class="fas fa-book-reader"></i>
+            <h1>Welcome to FlipBook</h1>
+            <p>Join our community to explore interactive flipbooks</p>
+        </div>
+        <form method="post" action="{% url 'register' %}" class="register-form" id="registerForm" enctype="application/x-www-form-urlencoded">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_username"><i class="fas fa-user"></i> Username</label>
+                <input type="text" id="id_username" name="username" maxlength="150" required class="form-control">
+                <small class="form-hint">150 characters or fewer. Letters, digits and @/./+/-/_ only.</small>
+            </div>
+            <div class="form-group">
+                <label for="id_password1"><i class="fas fa-lock"></i> Password</label>
+                <input type="password" id="id_password1" name="password1" required class="form-control">
+                <small class="form-hint">
+                    <ul>
+                        <li>Your password must contain at least 8 characters.</li>
+                        <li>Your password can't be entirely numeric.</li>
+                    </ul>
+                </small>
+            </div>
+            <div class="form-group">
+                <label for="id_password2"><i class="fas fa-lock"></i> Confirm Password</label>
+                <input type="password" id="id_password2" name="password2" required class="form-control">
+                <small class="form-hint">Enter the same password as before, for verification.</small>
+            </div>
+            <div class="form-group">
+                <label for="id_mobile_number"><i class="fas fa-phone"></i> Mobile Number</label>
+                <input type="text" id="id_mobile_number" name="mobile_number" maxlength="15" required class="form-control" >
+                <small class="form-hint">Enter a valid mobile number.</small>
+            </div>
+            {% if form.errors %}
+            <div class="error-message-box">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i> {{ error }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            {% endif %}
+            <button type="submit" class="btn btn-register">Create Account</button>
+            <div class="register-footer">
+                <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .register-container { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 80px); padding: 20px; background: linear-gradient(135deg, #FAF3E1 0%, #F5E7C6 100%); }
+    .register-card { background: white; border-radius: 20px; padding: 50px 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); max-width: 500px; width: 100%; }
+    .register-header { text-align: center; margin-bottom: 40px; }
+    .register-header i { font-size: 60px; color: #FA8112; margin-bottom: 20px; }
+    .register-header h1 { font-size: 32px; font-weight: 700; color: #222222; margin-bottom: 10px; }
+    .register-header p { color: #666; font-size: 16px; }
+    .register-form { display: flex; flex-direction: column; gap: 25px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group label { font-weight: 600; color: #222222; font-size: 16px; }
+    .form-group label i { color: #FA8112; margin-right: 5px; }
+    .form-group input, .form-control { padding: 14px 18px; border: 2px solid #c1c2c2; border-radius: 10px; font-size: 15px; transition: all 0.3s ease; }
+    .form-group input:focus, .form-control:focus { outline: none; border-color: #FA8112; box-shadow: 0 0 0 3px rgba(250, 129, 18, 0.1); }
+    .form-hint { font-size: 12px; color: #666; display: block; margin-top: 6px; }
+    .form-hint ul { margin-left: 20px; margin-top: 5px; line-height: 1.6; }
+    .form-hint li { font-size: 12px; }
+    .error-message-box { display: flex; flex-direction: column; gap: 10px; }
+    .error-message { background: #fee2e2; color: #dc2626; padding: 12px 16px; border-radius: 8px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .btn-register { width: 100%; padding: 16px; font-size: 16px; background: linear-gradient(135deg, #FA8112 0%, #FF9140 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; }
+    .btn-register:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(250, 129, 18, 0.4); }
+    .register-footer { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
+    .register-footer p { color: #666; font-size: 14px; }
+    .register-footer a { color: #FA8112; text-decoration: none; font-weight: 600; transition: color 0.3s; }
+    .register-footer a:hover { color: #FF9140; }
+    @media (max-width: 768px) {
+        .register-card { padding: 40px 30px; }
+        .register-header h1 { font-size: 28px; }
+        .register-form { gap: 20px; }
+    }
+</style>
+
+<script>
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        const password1 = document.getElementById('id_password1').value;
+        const password2 = document.getElementById('id_password2').value;
+        
+        if (password1 !== password2) {
+            e.preventDefault();
+            alert('Passwords do not match!');
+            return false;
+        }
+    });
+</script>
+{% endblock %}

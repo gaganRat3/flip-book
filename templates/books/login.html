@@ -10,40 +10,147 @@
             <h1>Welcome Back</h1>
             <p>Login to access your flipbooks</p>
         </div>
-        <form method="post" class="login-form">
+        <form method="post" action="{% url 'login' %}" class="login-form" id="loginForm" enctype="application/x-www-form-urlencoded">
             {% csrf_token %}
             <div class="form-group">
                 <label for="id_username"><i class="fas fa-user"></i> Username</label>
-                {{ form.username }}
+                <input type="text" id="id_username" name="username" maxlength="150" class="form-control" placeholder="Enter your username">
+            </div>
+            <div class="form-group">
+                <label for="id_mobile_number"><i class="fas fa-mobile-alt"></i> Mobile Number</label>
+                <input type="text" id="id_mobile_number" name="mobile_number" maxlength="15" class="form-control" placeholder="Enter your mobile number">
             </div>
             <div class="form-group">
                 <label for="id_password"><i class="fas fa-lock"></i> Password</label>
-                {{ form.password }}
+                <input type="password" id="id_password" name="password" required class="form-control" placeholder="Password">
             </div>
             {% if form.errors %}
             <div class="error-message">
                 <i class="fas fa-exclamation-circle"></i> Invalid credentials. Please try again.
             </div>
             {% endif %}
-            <button type="submit" class="btn btn-login"><i class="fas fa-sign-in-alt"></i> Login</button>
+            <button type="submit" class="btn btn-login"> Login</button>
+            <div class="login-footer">
+                <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+            </div>
         </form>
     </div>
 </div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+            <div class="spinner-ring"></div>
+        </div>
+        <h2>Logging you in...</h2>
+        <p>Please wait a moment</p>
+    </div>
+</div>
+
 <style>
-    .login-container { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 80px); padding: 20px; }
+    .login-container { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 80px); padding: 20px; background: linear-gradient(135deg, #FAF3E1 0%, #F5E7C6 100%); }
     .login-card { background: white; border-radius: 20px; padding: 50px 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); max-width: 450px; width: 100%; }
     .login-header { text-align: center; margin-bottom: 40px; }
-    .login-header i { font-size: 60px; color: #667eea; margin-bottom: 20px; }
-    .login-header h1 { font-size: 32px; font-weight: 700; color: #333; margin-bottom: 10px; }
+    .login-header i { font-size: 60px; color: #FA8112; margin-bottom: 20px; }
+    .login-header h1 { font-size: 32px; font-weight: 700; color: #222222; margin-bottom: 10px; }
     .login-header p { color: #666; font-size: 16px; }
     .login-form { display: flex; flex-direction: column; gap: 25px; }
     .form-group { display: flex; flex-direction: column; gap: 8px; }
-    .form-group label { font-weight: 600; color: #333; font-size: 14px; }
-    .form-group label i { color: #667eea; margin-right: 5px; }
-    .form-group input { padding: 14px 18px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 15px; transition: all 0.3s ease; }
-    .form-group input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+    .form-group label { font-weight: 600; color: #222222; font-size: 14px; }
+    .form-group label i { color: #FA8112; margin-right: 5px; }
+    .form-group input, .form-control { padding: 14px 18px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 15px; transition: all 0.3s ease; }
+    .form-group input:focus, .form-control:focus { outline: none; border-color: #FA8112; box-shadow: 0 0 0 3px rgba(250, 129, 18, 0.1); }
     .error-message { background: #fee2e2; color: #dc2626; padding: 12px 16px; border-radius: 8px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
-    .btn-login { width: 100%; padding: 16px; font-size: 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; }
-    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); }
+    .btn-login { width: 100%; padding: 16px; font-size: 16px; background: linear-gradient(135deg, #FA8112 0%, #FF9140 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; }
+    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(250, 129, 18, 0.4); }
+    .login-footer { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
+    .login-footer p { color: #666; font-size: 14px; }
+    .login-footer a { color: #FA8112; text-decoration: none; font-weight: 600; transition: color 0.3s; }
+    .login-footer a:hover { color: #FF9140; }
+    
+    /* Loading Overlay Styles */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #161E54 0%, #161E54 100%);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .loading-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    .loading-content {
+        text-align: center;
+        color: white;
+        animation: fadeInUp 0.5s ease;
+    }
+    .spinner-container {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 30px;
+    }
+    .spinner {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 4px solid rgba(255, 255, 255, 0.2);
+        border-top: 4px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    .spinner-ring {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 4px solid transparent;
+        border-left: 4px solid rgba(255, 255, 255, 0.5);
+        border-right: 4px solid rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        animation: spin 1.5s linear infinite reverse;
+    }
+    .loading-content h2 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+    .loading-content p {
+        font-size: 16px;
+        opacity: 0.9;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 </style>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        // Show loading overlay
+        document.getElementById('loadingOverlay').classList.add('active');
+    });
+</script>
 {% endblock %}

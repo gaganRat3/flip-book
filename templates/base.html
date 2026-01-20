@@ -5,37 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}FlipBook{% endblock %}</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     {% block extra_css %}{% endblock %}
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Courier Prime', 'Courier New', monospace;
+            background: linear-gradient(135deg, #FAF3E1 0%, #F5E7C6 100%);
             min-height: 100vh;
-            color: #333;
+            color: #222222;
         }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 4px 0;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 100%);
+                backdrop-filter: blur(20px);
+            padding: 15px 0;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1), 
+                        0 1px 0 rgba(255, 255, 255, 0.8) inset,
+                        0 -1px 0 rgba(0, 0, 0, 0.05) inset;
             position: sticky;
             top: 0;
             z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .navbar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.8) 20%, 
+                rgba(255, 255, 255, 0.8) 80%, 
+                transparent 100%);
         }
         .navbar .container { display: flex; justify-content: space-between; align-items: center; }
         .navbar-brand {
-            font-size: 24px;
-            font-weight: 700;
-            color: #667eea;
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+        .navbar-brand img {
+            height: 45px;
+            width: auto;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+        .navbar-brand:hover img {
+            transform: scale(1.05);
         }
         .navbar-menu { display: flex; gap: 20px; align-items: center; }
         .btn {
@@ -50,19 +72,19 @@
             font-size: 14px;
         }
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #161E54 0%, #161E54 100%);
             color: white;
         }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
-        .btn-secondary { background: #f3f4f6; color: #333; }
-        .btn-secondary:hover { background: #e5e7eb; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(250, 129, 18, 0.4); }
+        .btn-secondary { background: #F5E7C6; color: #222222; }
+        .btn-secondary:hover { background: #ECDEB5; }
         .messages { position: fixed; top: 80px; right: 20px; z-index: 9999; max-width: 400px; }
         .alert { padding: 15px 20px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .alert-success { background: #10b981; color: white; }
         .alert-error { background: #ef4444; color: white; }
         .alert-info { background: #3b82f6; color: white; }
         @media (max-width: 768px) {
-            .navbar-brand { font-size: 18px; }
+            .navbar-brand img { height: 35px; }
             .navbar-menu { gap: 10px; }
             .btn { padding: 8px 16px; font-size: 12px; }
         }
@@ -72,14 +94,14 @@
     <nav class="navbar">
         <div class="container">
             <a href="{% url 'home' %}" class="navbar-brand">
-                <i class="fas fa-book-open"></i> FlipBook Pro
+                <img src="{{ MEDIA_URL }}BN.png" alt="Company Logo">
             </a>
             <div class="navbar-menu">
                 {% if user.is_authenticated %}
                     <span style="color: #666; font-size: 14px;"><i class="fas fa-user"></i> {{ user.username }}</span>
                     <a href="{% url 'logout' %}" class="btn btn-primary"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Login</a>
+                    {% comment %} <a href="{% url 'login' %}" class="btn btn-primary"></i> Login</a> {% endcomment %}
                 {% endif %}
             </div>
         </div>
