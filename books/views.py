@@ -86,10 +86,18 @@ def home_view(request):
         except (ValueError, TypeError):
             selected_event = None
     
+    # Gender sub-filter
+    selected_gender = request.GET.get('gender', None)
+    if selected_gender == 'girl':
+        books = books.filter(title__icontains='girl')
+    elif selected_gender == 'boy':
+        books = books.filter(title__icontains='boy')
+
     context = {
         'books': books,
         'events': events,
         'selected_event': selected_event,
+        'selected_gender': selected_gender,
     }
     return render(request, 'books/home.html', context)
 

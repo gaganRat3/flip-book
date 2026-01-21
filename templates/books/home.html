@@ -19,10 +19,17 @@
                     <i class="fas fa-list"></i> All Books
                 </a>
                 {% for event in events %}
-                <a href="{% url 'home' %}?event={{ event.id }}" class="event-filter-btn {% if selected_event == event.id %}active{% endif %}" style="--event-color: {{ event.color }};">
+                <a href="{% url 'home' %}?event={{ event.id }}{% if selected_gender %}&gender={{ selected_gender }}{% endif %}" class="event-filter-btn {% if selected_event == event.id %}active{% endif %}" style="--event-color: {{ event.color }};">
                     <i class="{{ event.icon }}"></i> {{ event.name }}
                 </a>
                 {% endfor %}
+            </div>
+
+            <!-- Sub-filter for Girl/Boy -->
+            <div class="gender-filter-container" style="margin-top: 10px;">
+                <a href="{% url 'home' %}{% if selected_event %}?event={{ selected_event }}{% endif %}" class="gender-filter-btn {% if not selected_gender %}active{% endif %}">All</a>
+                <a href="{% url 'home' %}?{% if selected_event %}event={{ selected_event }}&{% endif %}gender=girl" class="gender-filter-btn {% if selected_gender == 'girl' %}active{% endif %}">Girl</a>
+                <a href="{% url 'home' %}?{% if selected_event %}event={{ selected_event }}&{% endif %}gender=boy" class="gender-filter-btn {% if selected_gender == 'boy' %}active{% endif %}">Boy</a>
             </div>
         </div>
         {% endif %}
