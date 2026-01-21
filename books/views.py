@@ -73,10 +73,10 @@ def logout_view(request):
 @login_required
 def home_view(request):
     """Home page - list only flipbooks user can access, with event filtering"""
-    accessible_ids = FlipBookAccess.objects.filter(user=request.user).values_list('flipbook_id', flat=True)
-    books = FlipBook.objects.filter(is_published=True, id__in=accessible_ids)
+    accessible_ids = list(FlipBookAccess.objects.filter(user=request.user).values_list('flipbook_id', flat=True))
+    books = FlipBook.objects.filter(is_published=True)
     events = Event.objects.filter(is_active=True)
-    
+
     # Get selected event from query parameter
     selected_event = request.GET.get('event', None)
     if selected_event:
@@ -85,7 +85,7 @@ def home_view(request):
             books = books.filter(event_id=selected_event)
         except (ValueError, TypeError):
             selected_event = None
-    
+
     # Gender sub-filter
     selected_gender = request.GET.get('gender', None)
     if selected_gender == 'girl':
@@ -93,11 +93,15 @@ def home_view(request):
     elif selected_gender == 'boy':
         books = books.filter(title__icontains='boy')
 
+    # Sort books: accessible first, then locked
+    books = sorted(books, key=lambda b: b.id not in accessible_ids)
+
     context = {
         'books': books,
         'events': events,
         'selected_event': selected_event,
         'selected_gender': selected_gender,
+        'accessible_ids': accessible_ids,
     }
     return render(request, 'books/home.html', context)
 
