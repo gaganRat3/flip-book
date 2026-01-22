@@ -104,8 +104,8 @@ class FlipBook(models.Model):
             for page_num in range(total_pages):
                 page = pdf_document[page_num]
                 
-                # Render page to image (1.5x zoom for balance of quality and file size)
-                mat = fitz.Matrix(1.5, 1.5)
+                # Render page to image (1.0x zoom for proper fit to container)
+                mat = fitz.Matrix(1.0, 1.0)
                 pix = page.get_pixmap(matrix=mat)
                 
                 # Save as JPEG with optimized quality

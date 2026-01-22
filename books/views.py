@@ -129,6 +129,7 @@ def flipbook_view(request, book_id):
     context = {
         'book': book,
         'pages': json.dumps(pages),  # Convert to JSON for JavaScript
+        'pages_list': pages,  # Keep as list for template iteration
         'total_pages': book.total_pages,
     }
     
