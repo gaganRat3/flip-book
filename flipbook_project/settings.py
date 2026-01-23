@@ -11,10 +11,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'def417304391.ngrok-free.app']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '58039ee8d1df.ngrok-free.app']
 
 # CSRF trusted origins for ngrok
-CSRF_TRUSTED_ORIGINS = ['https://def417304391.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://58039ee8d1df.ngrok-free.app']
 
 # CSRF cookie settings for production
 CSRF_COOKIE_SECURE = False  # Set to True if using HTTPS in production

@@ -14,7 +14,7 @@
     .flipbook-container { position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; flex-shrink: 0; overflow: visible; }
     #flipbook { margin: 0 auto; }
     #flipbook .page { background: white; box-shadow: 0 0 20px rgba(0, 0, 0, 0.2); }
-    #flipbook .page img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    #flipbook .page img { width: 100%; height: 100%; object-fit: contain; display: block; image-rendering: crisp-edges; image-rendering: -webkit-optimize-contrast; }
     /* Side Navigation Buttons */
     .side-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: linear-gradient(135deg, #125bfa4d 0%, #4083ff4d 100%); border: none; color: white; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 5px 20px rgba(18, 91, 250, 0.3); z-index: 100; }
     .side-nav-btn:hover:not(:disabled) { background: linear-gradient(135deg, #0d48a19f 0%, #2566e848 100%); transform: translateY(-50%) scale(1.1); }
@@ -42,10 +42,33 @@
         .flipbook-container { max-width: 100%; max-height: 75vh; padding: 0 10px; overflow: visible; }
         #prev-side-btn { display: flex !important; width: 40px; height: 40px; font-size: 16px; left: 10px; z-index: 1000; }
         #next-side-btn { display: flex !important; width: 40px; height: 40px; font-size: 16px; right: 10px; z-index: 1000; }
-        .controls { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); padding: 10px 12px; gap: 5px; flex-wrap: wrap; justify-content: center; border-radius: 25px; width: 95%; max-width: 100%; margin: 0; overflow: visible; display: flex; }
+        .controls {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 8px;
+            gap: 4px;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            border-radius: 25px;
+            width: 98vw;
+            max-width: 100vw;
+            margin: 0;
+            overflow-x: auto;
+            overflow-y: visible;
+            display: flex;
+            align-items: center;
+            scrollbar-width: none;
+        }
+        .controls::-webkit-scrollbar { display: none; }
+        .jump-to-page { display: flex; min-width: 120px; }
+        .jump-to-page input { min-width: 60px; }
+        .page-counter { min-width: 60px; }
+        .zoom-controls { min-width: 80px; }
         .control-btn { width: 38px; height: 38px; font-size: 13px; flex-shrink: 0; min-width: 38px; }
         .page-counter { font-size: 12px; min-width: 65px; padding: 0 10px; flex-shrink: 0; white-space: nowrap; }
-        .jump-to-page { display: none; }
+        /* .jump-to-page { display: none; } */
         .zoom-controls { margin-left: 5px; padding-left: 5px; border-left: 1px solid rgba(255, 255, 255, 0.2); gap: 5px; }
         .fullscreen-btn { margin-left: 5px; padding-left: 5px; border-left: 1px solid rgba(255, 255, 255, 0.2); }
     }
@@ -54,7 +77,24 @@
         .flipbook-container { padding: 0 10px; max-height: 70vh; }
         #prev-side-btn { width: 38px; height: 38px; font-size: 14px; left: 8px; }
         #next-side-btn { width: 38px; height: 38px; font-size: 14px; right: 8px; }
-        .controls { bottom: 8px; padding: 8px 10px; gap: 4px; width: 98%; }
+        .controls {
+            bottom: 8px;
+            padding: 8px 4px;
+            gap: 3px;
+            width: 99vw;
+            max-width: 100vw;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: visible;
+            display: flex;
+            align-items: center;
+            scrollbar-width: none;
+        }
+        .controls::-webkit-scrollbar { display: none; }
+        .jump-to-page { min-width: 110px; }
+        .jump-to-page input { min-width: 50px; }
+        .page-counter { min-width: 50px; }
+        .zoom-controls { min-width: 60px; }
         .control-btn { width: 36px; height: 36px; font-size: 12px; min-width: 36px; }
         .page-counter { font-size: 11px; min-width: 55px; padding: 0 5px; }
         .zoom-controls { margin-left: 3px; padding-left: 3px; gap: 3px; }
@@ -117,7 +157,6 @@ $(document).ready(function() {
         pages = [];
     }
     const loadedPages = new Set();
-    
     // Preload page images
     function loadPage(pageNum) {
         if (loadedPages.has(pageNum) || pageNum < 1 || pageNum > totalPages) return;
@@ -221,9 +260,39 @@ $(document).ready(function() {
         }
     });
     
+    const baseWidth = 900;
+    const baseHeight = 1000;
+    
     $('#zoom-in').click(function() { if (currentZoom < 2) { currentZoom += 0.2; applyZoom(); } });
     $('#zoom-out').click(function() { if (currentZoom > 0.6) { currentZoom -= 0.2; applyZoom(); } });
-    function applyZoom() { $('#flipbook-wrapper').css('transform', 'scale(' + currentZoom + ')'); }
+    
+    function applyZoom() {
+        const isMobile = window.innerWidth <= 768;
+        const newWidth = (isMobile ? window.innerWidth * 0.9 : baseWidth) * currentZoom;
+        const newHeight = (isMobile ? window.innerHeight * 0.65 : baseHeight) * currentZoom;
+        
+        // Dynamically resize the flipbook using turn.js
+        try {
+            $("#flipbook").turn("size", newWidth, newHeight);
+        } catch(e) {
+            console.log("Zoom resize error:", e);
+        }
+        
+        // Adjust overflow based on zoom level
+        const viewerContent = $('#viewer-content');
+        if (currentZoom === 1) {
+            viewerContent.css({
+                'overflow-y': 'auto',
+                'overflow-x': 'hidden'
+            });
+            $('#flipbook-wrapper').css('transform', 'none');
+        } else {
+            viewerContent.css({
+                'overflow-y': 'auto',
+                'overflow-x': 'auto'
+            });
+        }
+    }
     $('#fullscreen').click(function() {
         const element = document.getElementById('viewer-content');
         if (!document.fullscreenElement) { element.requestFullscreen(); $(this).find('i').removeClass('fa-expand').addClass('fa-compress'); }

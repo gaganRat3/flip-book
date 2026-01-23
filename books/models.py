@@ -74,7 +74,7 @@ class FlipBook(models.Model):
                 pix = page.get_pixmap(matrix=mat)
                 thumbnail_path = os.path.join(settings.MEDIA_ROOT, 'thumbnails', f'{self.id}_thumb.jpg')
                 os.makedirs(os.path.dirname(thumbnail_path), exist_ok=True)
-                img_data = pix.tobytes("jpeg", jpg_quality=85)
+                img_data = pix.tobytes("jpeg", jpg_quality=100)
                 with open(thumbnail_path, 'wb') as f:
                     f.write(img_data)
                 self.thumbnail = f'thumbnails/{self.id}_thumb.jpg'
@@ -104,15 +104,15 @@ class FlipBook(models.Model):
             for page_num in range(total_pages):
                 page = pdf_document[page_num]
                 
-                # Render page to image (1.0x zoom for proper fit to container)
-                mat = fitz.Matrix(1.0, 1.0)
+                # Render page to image at 2.0x zoom (144 DPI) for sharp quality
+                mat = fitz.Matrix(2.0, 2.0)
                 pix = page.get_pixmap(matrix=mat)
                 
                 # Save as JPEG with optimized quality
                 image_path = os.path.join(book_dir, f'page_{page_num + 1}.jpg')
                 
                 # Convert to PIL Image for better compression control
-                img_data = pix.tobytes("jpeg", jpg_quality=75)
+                img_data = pix.tobytes("jpeg", jpg_quality=90)
                 with open(image_path, 'wb') as f:
                     f.write(img_data)
                 
@@ -132,7 +132,7 @@ class FlipBook(models.Model):
                 
                 with Image.open(first_page_image) as img:
                     img.thumbnail((300, 400))
-                    img.save(thumbnail_path, 'JPEG', quality=85)
+                    img.save(thumbnail_path, 'JPEG', quality=90)
                 
                 self.thumbnail = f'thumbnails/{self.id}_thumb.jpg'
             
